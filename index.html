@@ -118,10 +118,17 @@
 
   #newsImg {
     width:100%; height:100%;
-    object-fit:cover;
-    transition: opacity 0.9s ease;
-    filter: brightness(0.9) contrast(1.05);
+    object-fit:contain;
+    object-position: center center;
+    background:#000;
+    transition: opacity 0.9s ease, transform 7s ease-in-out;
+    filter: brightness(0.95) contrast(1.03);
+    transform: scale(1);
   }
+  @keyframes zoomIn  { from { transform:scale(1);    } to { transform:scale(1.08); } }
+  @keyframes zoomOut { from { transform:scale(1.08); } to { transform:scale(1);    } }
+  #newsImg.zoom-in  { animation: zoomIn  7s ease-in-out forwards; }
+  #newsImg.zoom-out { animation: zoomOut 7s ease-in-out forwards; }
 
   .img-corner { /* scanlines effect */
     position:absolute; inset:0; pointer-events:none; z-index:3;
@@ -252,15 +259,15 @@
 
   /* ─── CONTROLS PANEL ─── */
   #controlPanel {
-    position:absolute; top:80px; right:3%;
-    width:200px;
+    position:fixed; bottom:152px; right:14px;
+    width:215px;
     background: var(--panel);
-    border:1px solid #ffffff15;
-    border-radius:10px;
+    border:1px solid #ffffff22;
+    border-radius:12px;
     padding:14px;
-    z-index:20;
+    z-index:24;
     display:none;
-    box-shadow: 0 8px 40px #000a;
+    box-shadow: 0 8px 40px #000c, var(--glow-cyan);
     flex-direction:column; gap:10px;
   }
 
@@ -292,15 +299,15 @@
 
   /* ─── GEAR BUTTON ─── */
   #gearBtn {
-    position:absolute; top:80px; right:calc(3% + 210px);
-    z-index:21; background: var(--panel);
-    border:1px solid #ffffff20; border-radius:8px;
-    width:44px; height:44px;
+    position:fixed; bottom:90px; right:14px;
+    z-index:25; background: rgba(0,10,20,0.92);
+    border:2px solid #ffffff20; border-radius:50%;
+    width:50px; height:50px;
     display:flex; align-items:center; justify-content:center;
-    cursor:pointer; font-size:20px;
-    transition:all 0.2s;
+    cursor:pointer; font-size:22px;
+    transition:all 0.3s; box-shadow:0 2px 16px #000c;
   }
-  #gearBtn:hover { border-color:var(--cyan); box-shadow:var(--glow-cyan); }
+  #gearBtn:hover { border-color:var(--cyan); box-shadow:var(--glow-cyan); transform:rotate(45deg); }
 
   /* ─── STATUS BAR ─── */
   #statusBar {
@@ -310,10 +317,10 @@
   }
 
   #newsCounter {
-    position:absolute; right:3%; top:80px;
-    margin-top:55px; right:calc(3% + 210px);
-    font-family:'Bebas Neue'; font-size:15px; letter-spacing:2px; color:#ffffff55;
-    z-index:10;
+    position:fixed; bottom:90px; left:16px;
+    font-family:'Bebas Neue'; font-size:14px; letter-spacing:2px;
+    color:#ffffff66; z-index:10;
+    background:rgba(0,0,0,0.5); padding:4px 10px; border-radius:4px;
   }
 
   /* ─── LOADING OVERLAY ─── */
@@ -637,27 +644,69 @@ function startSlideshow(linksText) {
   const links = linksText.split(',').map(l => l.trim()).filter(Boolean);
   if (links.length === 0) return;
   let idx = 0;
+  let kenDir = true; // true = zoom-in, false = zoom-out
+
   const showNext = () => {
     newsImg.style.opacity = '0';
-    setTimeout(() => { newsImg.src = links[idx]; newsImg.style.opacity = '1'; }, 800);
+    newsImg.classList.remove('ken-in', 'ken-out');
+    setTimeout(() => {
+      newsImg.src = links[idx];
+      newsImg.style.opacity = '1';
+      // Alternate zoom direction each image
+      void newsImg.offsetWidth; // force reflow
+      newsImg.classList.add(kenDir ? 'ken-in' : 'ken-out');
+      kenDir = !kenDir;
+    }, 850);
   };
+
   showNext();
   if (links.length > 1) {
-    imageInterval = setInterval(() => { idx = (idx + 1) % links.length; showNext(); }, CONFIG.imageInterval);
+    imageInterval = setInterval(() => {
+      idx = (idx + 1) % links.length;
+      showNext();
+    }, CONFIG.imageInterval);
   }
 }
 
 // ════════════════════════════════════════════════════════
-//  LOWER THIRD ANIMATION
+//  LOWER THIRD — Multi-headline rotation with zoom animation
 // ════════════════════════════════════════════════════════
-function showLowerThird(headline) {
+let headlineInterval = null;
+let headlineList = [];
+let hlIndex = 0;
+
+function showLowerThird(headlineText) {
+  clearInterval(headlineInterval);
   lowerThird.classList.remove('show');
-  ltSubline.textContent = headline || '';
-  setTimeout(() => lowerThird.classList.add('show'), 400);
+  // Support multiple headlines separated by comma
+  headlineList = (headlineText || 'Breaking News')
+    .split(',').map(h => h.trim()).filter(Boolean);
+  hlIndex = 0;
+
+  function displayHeadline() {
+    ltSubline.style.opacity = '0';
+    ltSubline.style.transform = 'translateX(-12px)';
+    setTimeout(() => {
+      ltSubline.textContent = headlineList[hlIndex];
+      ltSubline.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      ltSubline.style.opacity = '1';
+      ltSubline.style.transform = 'translateX(0)';
+    }, 300);
+    hlIndex = (hlIndex + 1) % headlineList.length;
+  }
+
+  setTimeout(() => {
+    lowerThird.classList.add('show');
+    displayHeadline();
+    if (headlineList.length > 1) {
+      headlineInterval = setInterval(displayHeadline, 4000);
+    }
+  }, 400);
 }
 
 function hideLowerThird() {
   lowerThird.classList.remove('show');
+  clearInterval(headlineInterval);
 }
 
 // ════════════════════════════════════════════════════════
