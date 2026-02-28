@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PTN MANUAL NEWS PRO — LIVE STUDIO</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Noto+Sans+Devanagari:wght@400;700;900&family=Bebas+Neue&family=Exo+2:wght@300;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #e60000;
+    --cyan: #00e5ff;
+    --gold: #ffc200;
+    --dark: #050a0f;
+    --panel: rgba(0,10,20,0.92);
+    --glow-red: 0 0 18px #e60000aa;
+    --glow-cyan: 0 0 18px #00e5ffaa;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body, html {
+    width:100%; height:100%;
+    background:#000;
+    overflow:hidden;
+    font-family:'Exo 2', sans-serif;
+    color:#fff;
+  }
+
+  /* ─── STUDIO BACKGROUND ─── */
+  #studio {
+    position:relative;
+    width:100vw; height:100vh;
+    background: radial-gradient(ellipse at 70% 40%, #0a1a2e 0%, #000 70%);
+    overflow:hidden;
+  }
+
+  /* Animated grid overlay */
+  #studio::before {
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridPulse 4s ease-in-out infinite;
+    pointer-events:none; z-index:0;
+  }
+
+  @keyframes gridPulse {
+    0%,100% { opacity:0.4; }
+    50% { opacity:1; }
+  }
+
+  /* ─── LOGO / HEADER ─── */
+  #header {
+    position:absolute; top:0; left:0; right:0;
+    height:70px;
+    background: linear-gradient(90deg, #e60000 0%, #800000 40%, transparent 100%);
+    display:flex; align-items:center; padding:0 20px;
+    z-index:10;
+    border-bottom: 2px solid #ff000066;
+    box-shadow: 0 4px 30px #e6000066;
+  }
+
+  #header .logo {
+    font-family:'Bebas Neue'; font-size:42px;
+    letter-spacing:4px; color:#fff;
+    text-shadow: 0 0 20px #fff, var(--glow-red);
+  }
+
+  #header .tagline {
+    margin-left:16px; font-size:11px; font-weight:300;
+    color:#ffaaaa; letter-spacing:2px; text-transform:uppercase;
+    border-left: 2px solid #ff000088;
+    padding-left:14px;
+    line-height:1.4;
+  }
+
+  #liveTag {
+    margin-left:auto; display:flex; align-items:center; gap:8px;
+    font-family:'Bebas Neue'; font-size:22px; letter-spacing:3px;
+    color:#fff; background:#e60000;
+    padding:6px 18px; border-radius:4px;
+    box-shadow: var(--glow-red);
+  }
+
+  #liveDot {
+    width:10px; height:10px; border-radius:50%;
+    background:#fff;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  #timeDisplay {
+    margin-left:20px; font-family:'Bebas Neue'; font-size:20px;
+    color:#00e5ff; letter-spacing:2px;
+  }
+
+  /* ─── VISUAL BOX (Image) ─── */
+  #visualBox {
+    position:absolute; right:3%; top:80px;
+    width:43%; height:42%;
+    border:3px solid var(--cyan);
+    border-radius:10px;
+    overflow:hidden;
+    background:#000;
+    box-shadow: var(--glow-cyan), inset 0 0 40px #000a;
+    z-index:5;
+  }
+
+  #visualBox::before {
+    content:'VISUAL FEED';
+    position:absolute; top:8px; left:10px;
+    font-size:9px; letter-spacing:3px;
+    color:var(--cyan); opacity:0.7;
+    z-index:2; font-family:'Exo 2';
+  }
+
+  #newsImg {
+    width:100%; height:100%;
+    object-fit:cover;
+    transition: opacity 0.9s ease;
+    filter: brightness(0.9) contrast(1.05);
+  }
+
+  .img-corner { /* scanlines effect */
+    position:absolute; inset:0; pointer-events:none; z-index:3;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px
+    );
+  }
+
+  /* ─── TELEPROMPTER / SCRIPT BOX ─── */
+  #scriptBox {
+    position:absolute; left:2%; top:80px;
+    width:46%; height:62%;
+    background: var(--panel);
+    border-left: 8px solid var(--red);
+    border-radius:8px;
+    padding:22px 24px 22px 22px;
+    overflow:hidden;
+    box-shadow: var(--glow-red), inset 0 0 30px #0008;
+    z-index:5;
+  }
+
+  #scriptLabel {
+    font-size:9px; letter-spacing:3px; color:var(--red);
+    margin-bottom:10px; text-transform:uppercase;
+  }
+
+  #teleprompter {
+    font-family:'Noto Sans Devanagari', sans-serif;
+    font-size:28px; line-height:1.75; font-weight:700;
+    position:relative; top:0;
+    transition: top 0.25s linear;
+    text-align:justify;
+    color:#f0f4f8;
+    text-shadow: 0 1px 4px #000;
+  }
+
+  /* Fade overlay at bottom of prompter */
+  #scriptBox::after {
+    content:'';
+    position:absolute; bottom:0; left:0; right:0; height:80px;
+    background: linear-gradient(transparent, var(--panel));
+    pointer-events:none;
+  }
+
+  /* ─── ANCHOR (Chroma Canvas) ─── */
+  #anchorWrap {
+    position:absolute; right:0; bottom:85px;
+    width:60%; height:75%;
+    pointer-events:none; z-index:6;
+    display:flex; justify-content:flex-end; align-items:flex-end;
+  }
+
+  #anchorCanvas {
+    max-width:100%; max-height:100%;
+    filter: drop-shadow(-8px 0 30px #000c);
+  }
+
+  #anchorVid { display:none; }
+
+  /* ─── LOWER THIRD ─── */
+  #lowerThird {
+    position:absolute; left:2%; bottom:90px;
+    width:55%; z-index:7;
+    transform: translateY(20px);
+    opacity:0;
+    transition: all 0.5s ease;
+  }
+
+  #lowerThird.show { opacity:1; transform: translateY(0); }
+
+  #ltHeadline {
+    background: var(--red);
+    font-family:'Rajdhani'; font-size:15px; font-weight:700;
+    letter-spacing:3px; padding:5px 14px;
+    text-transform:uppercase; display:inline-block;
+  }
+
+  #ltSubline {
+    background: rgba(0,0,0,0.88);
+    border-left:5px solid var(--gold);
+    font-family:'Noto Sans Devanagari'; font-size:19px; font-weight:700;
+    padding:8px 14px; display:block;
+    color:var(--gold);
+    border-bottom: 1px solid #ffffff22;
+  }
+
+  /* ─── TICKER BAR ─── */
+  #tickerBar {
+    position:absolute; bottom:0; left:0; right:0;
+    height:78px; z-index:10;
+    display:flex; align-items:stretch;
+    background: linear-gradient(90deg, #900000, #580000);
+    border-top:3px solid var(--red);
+    box-shadow: 0 -4px 20px #e6000055;
+  }
+
+  #tickerLabel {
+    background:var(--red);
+    width:120px; min-width:120px;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    font-family:'Bebas Neue'; font-size:18px; letter-spacing:2px;
+    border-right:3px solid #ffffff22;
+    box-shadow: var(--glow-red);
+  }
+
+  #tickerLabel span { font-size:9px; letter-spacing:3px; color:#ffaaaa; }
+
+  #tickerText {
+    flex:1; overflow:hidden;
+    display:flex; align-items:center;
+  }
+
+  #tickerInner {
+    white-space:nowrap;
+    font-family:'Rajdhani'; font-size:30px; font-weight:700;
+    padding: 0 40px;
+    animation: tickerScroll 30s linear infinite;
+    color:#fff;
+  }
+
+  @keyframes tickerScroll {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* ─── CONTROLS PANEL ─── */
+  #controlPanel {
+    position:absolute; top:80px; right:3%;
+    width:200px;
+    background: var(--panel);
+    border:1px solid #ffffff15;
+    border-radius:10px;
+    padding:14px;
+    z-index:20;
+    display:none;
+    box-shadow: 0 8px 40px #000a;
+    flex-direction:column; gap:10px;
+  }
+
+  #controlPanel.open { display:flex; }
+
+  #controlPanel h4 {
+    font-family:'Bebas Neue'; font-size:18px; letter-spacing:2px;
+    color:var(--cyan); border-bottom:1px solid #ffffff15; padding-bottom:8px;
+    text-align:center;
+  }
+
+  .ctrl-btn {
+    background: rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.1);
+    color:#fff; font-family:'Rajdhani'; font-size:15px; font-weight:600;
+    padding:9px 12px; border-radius:6px; cursor:pointer;
+    transition: all 0.2s; text-align:left; display:flex; align-items:center; gap:8px;
+  }
+  .ctrl-btn:hover { background:rgba(0,229,255,0.12); border-color:var(--cyan); color:var(--cyan); }
+  .ctrl-btn.danger:hover { background:rgba(230,0,0,0.15); border-color:var(--red); color:var(--red); }
+
+  .ctrl-btn .icon { font-size:16px; }
+
+  .ctrl-label { font-size:10px; letter-spacing:2px; color:#ffffff55; text-transform:uppercase; }
+
+  input[type=range] {
+    width:100%; accent-color:var(--cyan); cursor:pointer;
+  }
+
+  /* ─── GEAR BUTTON ─── */
+  #gearBtn {
+    position:absolute; top:80px; right:calc(3% + 210px);
+    z-index:21; background: var(--panel);
+    border:1px solid #ffffff20; border-radius:8px;
+    width:44px; height:44px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:20px;
+    transition:all 0.2s;
+  }
+  #gearBtn:hover { border-color:var(--cyan); box-shadow:var(--glow-cyan); }
+
+  /* ─── STATUS BAR ─── */
+  #statusBar {
+    position:absolute; left:2%; bottom:90px;
+    width:55%; height:0;
+    z-index:8;
+  }
+
+  #newsCounter {
+    position:absolute; right:3%; top:80px;
+    margin-top:55px; right:calc(3% + 210px);
+    font-family:'Bebas Neue'; font-size:15px; letter-spacing:2px; color:#ffffff55;
+    z-index:10;
+  }
+
+  /* ─── LOADING OVERLAY ─── */
+  #loadOverlay {
+    position:fixed; inset:0; z-index:100;
+    background:#000;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition: opacity 1s ease;
+  }
+
+  #loadOverlay .logo-big {
+    font-family:'Bebas Neue'; font-size:80px; letter-spacing:12px;
+    color:#fff; text-shadow: var(--glow-red), 0 0 60px #fff4;
+    animation: pulseIn 1.5s ease infinite alternate;
+  }
+
+  @keyframes pulseIn { from{opacity:0.5} to{opacity:1} }
+
+  #loadOverlay p {
+    font-size:13px; letter-spacing:4px; color:#ffffff55; margin-top:10px;
+    text-transform:uppercase;
+  }
+
+  #startBtn {
+    margin-top:40px;
+    background:var(--red); color:#fff;
+    font-family:'Bebas Neue'; font-size:26px; letter-spacing:4px;
+    padding:14px 60px; border:none; border-radius:6px;
+    cursor:pointer; box-shadow:var(--glow-red);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  #startBtn:hover { transform:scale(1.05); box-shadow:0 0 40px #e60000cc; }
+  #startBtn:active { transform:scale(0.97); }
+
+  #loadMsg {
+    margin-top:16px; font-size:13px; letter-spacing:2px;
+    color:#ffffff55; text-transform:uppercase; min-height:20px;
+  }
+
+  /* ─── ERROR TOAST ─── */
+  #toast {
+    position:fixed; top:20px; right:20px; z-index:200;
+    background:#1a0000; border:1px solid var(--red);
+    color:#ffbbbb; font-size:13px; padding:12px 20px;
+    border-radius:8px; max-width:320px;
+    box-shadow:var(--glow-red);
+    transform:translateY(-80px); opacity:0;
+    transition: all 0.4s ease;
+  }
+  #toast.show { transform:translateY(0); opacity:1; }
+
+  /* ─── PROGRESS BAR ─── */
+  #progressBar {
+    position:absolute; bottom:78px; left:0; right:0; height:3px;
+    background:#ffffff15; z-index:11;
+  }
+  #progressFill {
+    height:100%; width:0%; background:var(--cyan);
+    box-shadow:var(--glow-cyan);
+    transition: width 0.3s linear;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loadOverlay">
+  <div class="logo-big">📡 PTN</div>
+  <p>MANUAL NEWS PRO — LIVE BROADCAST STUDIO</p>
+  <button id="startBtn" onclick="initStudio()">▶ BROADCAST शुरू करें</button>
+  <div id="loadMsg"></div>
+</div>
+
+<!-- ERROR TOAST -->
+<div id="toast" id="toast"></div>
+
+<!-- STUDIO -->
+<div id="studio">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div class="logo">📡 PTN</div>
+    <div class="tagline">MANUAL NEWS PRO<br>LIVE BROADCAST</div>
+    <div id="liveTag"><div id="liveDot"></div>LIVE</div>
+    <div id="timeDisplay">--:--:--</div>
+  </div>
+
+  <!-- GEAR BUTTON -->
+  <div id="gearBtn" onclick="togglePanel()" title="Controls">⚙️</div>
+
+  <!-- NEWS COUNTER -->
+  <div id="newsCounter">—/—</div>
+
+  <!-- CONTROL PANEL -->
+  <div id="controlPanel">
+    <h4>⚙ CONTROLS</h4>
+
+    <div class="ctrl-label">Playback</div>
+    <button class="ctrl-btn" onclick="skipNews()"><span class="icon">⏭</span> अगली न्यूज़</button>
+    <button class="ctrl-btn" onclick="pauseResume()"><span class="icon">⏸</span> Pause / Resume</button>
+    <button class="ctrl-btn" onclick="restartCurrent()"><span class="icon">🔁</span> दोबारा चलाएं</button>
+
+    <div class="ctrl-label">Voice Rate</div>
+    <input type="range" id="rateSlider" min="0.6" max="1.4" step="0.05" value="0.9" oninput="updateRate(this.value)">
+    <div id="rateVal" style="font-size:11px;color:#ffffff55;text-align:center">Rate: 0.9×</div>
+
+    <div class="ctrl-label">Music Volume</div>
+    <input type="range" id="volSlider" min="0" max="1" step="0.05" value="0.15" oninput="updateVol(this.value)">
+
+    <button class="ctrl-btn danger" onclick="stopAll()"><span class="icon">⏹</span> Stop All</button>
+  </div>
+
+  <!-- VISUAL BOX -->
+  <div id="visualBox">
+    <img id="newsImg" src="" alt="Visual Feed">
+    <div class="img-corner"></div>
+  </div>
+
+  <!-- SCRIPT / TELEPROMPTER -->
+  <div id="scriptBox">
+    <div id="scriptLabel">📋 SCRIPT — TELEPROMPTER</div>
+    <div id="teleprompter">स्टूडियो तैयार है... न्यूज़ लोड हो रही है।</div>
+  </div>
+
+  <!-- ANCHOR CANVAS -->
+  <div id="anchorWrap">
+    <canvas id="anchorCanvas"></canvas>
+  </div>
+  <video id="anchorVid" muted loop crossorigin="anonymous" playsinline>
+    <source src="anchor_video.mp4" type="video/mp4">
+  </video>
+
+  <!-- LOWER THIRD -->
+  <div id="lowerThird">
+    <span id="ltHeadline">PTN NEWS</span>
+    <span id="ltSubline">लोड हो रहा है...</span>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div id="progressBar"><div id="progressFill"></div></div>
+
+  <!-- TICKER -->
+  <div id="tickerBar">
+    <div id="tickerLabel">FLASH<br><span>NEWS</span></div>
+    <div id="tickerText">
+      <div id="tickerInner">PTN NEWS — LIVE BROADCAST शुरू हो रहा है...</div>
+    </div>
+  </div>
+
+  <audio id="bgMusic" loop><source src="news_theme.mp3" type="audio/mpeg"></audio>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════════════
+const CONFIG = {
+  sheetId:   '1scDjloS8GTRIStm2jTBLSO55CQVpjLYJfd3fu9sIAgc',
+  sheetName: 'Sheet1',
+  imageInterval: 8000,     // ms between image slides
+  pauseBetweenNews: 3000,  // ms gap between news items
+  defaultRate: 0.9,
+  defaultVol: 0.15,
+  chromaGreenThreshold: 90,
+  chromaRatio: 1.25,
+};
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let newsItems = [];
+let newsIndex = 0;
+let imageInterval = null;
+let chromaFrame = null;
+let isPaused = false;
+let currentUtterance = null;
+let currentSpeechText = '';
+let currentSpeechRate = CONFIG.defaultRate;
+let voicesLoaded = false;
+let progressTimer = null;
+let speechStartTime = 0;
+let speechEstDuration = 0;
+
+const $ = id => document.getElementById(id);
+
+// ════════════════════════════════════════════════════════
+//  DOM REFS
+// ════════════════════════════════════════════════════════
+const video       = $('anchorVid');
+const canvas      = $('anchorCanvas');
+const ctx         = canvas.getContext('2d', { willReadFrequently: true });
+const bgMusic     = $('bgMusic');
+const teleprompter = $('teleprompter');
+const newsImg     = $('newsImg');
+const tickerInner = $('tickerInner');
+const lowerThird  = $('lowerThird');
+const ltSubline   = $('ltSubline');
+const progressFill = $('progressFill');
+const newsCounter = $('newsCounter');
+const loadOverlay = $('loadOverlay');
+const loadMsg     = $('loadMsg');
+const toast       = $('toast');
+
+// ════════════════════════════════════════════════════════
+//  CLOCK
+// ════════════════════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  $('timeDisplay').textContent =
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ════════════════════════════════════════════════════════
+//  TOAST NOTIFICATION
+// ════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, duration = 4000) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+// ════════════════════════════════════════════════════════
+//  VOICE LOADING
+// ════════════════════════════════════════════════════════
+function getHindiVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  return voices.find(v => v.lang === 'hi-IN') ||
+         voices.find(v => v.lang.startsWith('hi')) ||
+         null;
+}
+
+function loadVoices() {
+  return new Promise(resolve => {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) { resolve(); return; }
+    window.speechSynthesis.onvoiceschanged = () => resolve();
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  DATA LOADING (Google Sheet)
+// ════════════════════════════════════════════════════════
+async function loadData() {
+  setLoadMsg('📡 Google Sheet से डेटा लोड हो रहा है...');
+  const url = `https://docs.google.com/spreadsheets/d/${CONFIG.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(CONFIG.sheetName)}`;
+
+  let res;
+  try {
+    res = await fetch(url);
+  } catch(e) {
+    throw new Error('नेटवर्क त्रुटि — इंटरनेट कनेक्शन जांचें।');
+  }
+
+  if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+
+  const text = await res.text();
+
+  // Robust JSON extraction
+  const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+  if (!match) throw new Error('Google Sheet response parse नहीं हुई।');
+
+  let json;
+  try { json = JSON.parse(match[1]); } catch(e) { throw new Error('JSON parse error: ' + e.message); }
+
+  if (!json.table || !json.table.rows) throw new Error('Sheet में कोई data नहीं मिला।');
+
+  newsItems = json.table.rows
+    .map(row => ({
+      headline: row.c[0] && row.c[0].v ? String(row.c[0].v).trim() : '',
+      script:   row.c[1] && row.c[1].v ? String(row.c[1].v).trim() : '',
+      visual:   row.c[2] && row.c[2].v ? String(row.c[2].v).trim() : '',
+      flash:    row.c[3] && row.c[3].v ? String(row.c[3].v).trim() : '',
+    }))
+    .filter(item => item.script.length > 0 || item.headline.length > 0);
+
+  if (newsItems.length === 0) throw new Error('Sheet में कोई valid news नहीं मिली।');
+  return newsItems.length;
+}
+
+function setLoadMsg(msg) {
+  loadMsg.textContent = msg;
+}
+
+// ════════════════════════════════════════════════════════
+//  CHROMA KEY
+// ════════════════════════════════════════════════════════
+function processChroma() {
+  if (video.paused || video.ended) return;
+  canvas.width  = canvas.width  || video.videoWidth  || 640;
+  canvas.height = canvas.height || video.videoHeight || 480;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const d = frame.data;
+  const T = CONFIG.chromaGreenThreshold, R = CONFIG.chromaRatio;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i+1], b = d[i+2];
+    if (g > T && g > r * R && g > b * R) d[i+3] = 0;
+  }
+  ctx.putImageData(frame, 0, 0);
+  chromaFrame = requestAnimationFrame(processChroma);
+}
+
+function stopChroma() {
+  if (chromaFrame) { cancelAnimationFrame(chromaFrame); chromaFrame = null; }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ════════════════════════════════════════════════════════
+//  SLIDESHOW
+// ════════════════════════════════════════════════════════
+function startSlideshow(linksText) {
+  clearInterval(imageInterval);
+  if (!linksText) { newsImg.src = ''; return; }
+  const links = linksText.split(',').map(l => l.trim()).filter(Boolean);
+  if (links.length === 0) return;
+  let idx = 0;
+  const showNext = () => {
+    newsImg.style.opacity = '0';
+    setTimeout(() => { newsImg.src = links[idx]; newsImg.style.opacity = '1'; }, 800);
+  };
+  showNext();
+  if (links.length > 1) {
+    imageInterval = setInterval(() => { idx = (idx + 1) % links.length; showNext(); }, CONFIG.imageInterval);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  LOWER THIRD ANIMATION
+// ════════════════════════════════════════════════════════
+function showLowerThird(headline) {
+  lowerThird.classList.remove('show');
+  ltSubline.textContent = headline || '';
+  setTimeout(() => lowerThird.classList.add('show'), 400);
+}
+
+function hideLowerThird() {
+  lowerThird.classList.remove('show');
+}
+
+// ════════════════════════════════════════════════════════
+//  PROGRESS BAR
+// ════════════════════════════════════════════════════════
+function startProgress(durationMs) {
+  clearInterval(progressTimer);
+  progressFill.style.transition = 'none';
+  progressFill.style.width = '0%';
+  const start = Date.now();
+  progressTimer = setInterval(() => {
+    const pct = Math.min(100, ((Date.now() - start) / durationMs) * 100);
+    progressFill.style.width = pct + '%';
+    if (pct >= 100) clearInterval(progressTimer);
+  }, 100);
+}
+
+// Rough estimate: ~100 chars/sec at rate 0.9 in Hindi
+function estimateDuration(text, rate) {
+  return (text.length / 100) * (1 / rate) * 1000;
+}
+
+// ════════════════════════════════════════════════════════
+//  TICKER UPDATE
+// ════════════════════════════════════════════════════════
+function updateTicker(flash) {
+  tickerInner.textContent = flash || '📡 PTN LIVE — STAY TUNED';
+  // Reset animation
+  tickerInner.style.animation = 'none';
+  void tickerInner.offsetWidth;
+  tickerInner.style.animation = '';
+}
+
+// ════════════════════════════════════════════════════════
+//  NEWS COUNTER
+// ════════════════════════════════════════════════════════
+function updateCounter() {
+  newsCounter.textContent = `${newsIndex + 1} / ${newsItems.length}`;
+}
+
+// ════════════════════════════════════════════════════════
+//  PLAY NEWS ITEM
+// ════════════════════════════════════════════════════════
+function playNews() {
+  if (isPaused) return;
+  if (newsIndex >= newsItems.length) {
+    newsIndex = 0;
+    bgMusic.volume = 0.4;
+    showToast('✅ सभी न्यूज़ पूरी हो गईं। Replay होगा।');
+    setTimeout(playNews, 5000);
+    return;
+  }
+
+  const item = newsItems[newsIndex];
+  const scriptText = item.script || item.headline || '(No Script)';
+
+  // Teleprompter
+  teleprompter.textContent = scriptText;
+  teleprompter.style.top = '0px';
+
+  // Lower third
+  showLowerThird(item.headline || 'Breaking News');
+
+  // Ticker
+  updateTicker(item.flash);
+
+  // Slideshow
+  startSlideshow(item.visual);
+
+  // Counter
+  updateCounter();
+
+  // Estimate duration & start progress
+  speechEstDuration = estimateDuration(scriptText, currentSpeechRate);
+  startProgress(speechEstDuration);
+
+  // TTS
+  window.speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(scriptText);
+  msg.lang   = 'hi-IN';
+  msg.rate   = currentSpeechRate;
+  msg.voice  = getHindiVoice();
+  msg.volume = 1;
+  currentUtterance = msg;
+  currentSpeechText = scriptText;
+
+  msg.onstart = () => {
+    speechStartTime = Date.now();
+    video.play().catch(() => {});
+    canvas.width  = video.videoWidth  || 640;
+    canvas.height = video.videoHeight || 480;
+    processChroma();
+    bgMusic.volume = CONFIG.defaultVol;
+    bgMusic.play().catch(() => {});
+  };
+
+  msg.onboundary = (e) => {
+    if (e.name !== 'word') return;
+    const pct = Math.min(1, e.charIndex / scriptText.length);
+    const scrollTo = pct * Math.max(0, teleprompter.scrollHeight - 200);
+    teleprompter.style.top = `-${scrollTo}px`;
+  };
+
+  msg.onend = () => {
+    stopChroma();
+    video.pause();
+    bgMusic.volume = 0.35;
+    hideLowerThird();
+    progressFill.style.width = '100%';
+    clearInterval(progressTimer);
+    newsIndex++;
+    setTimeout(() => { if (!isPaused) playNews(); }, CONFIG.pauseBetweenNews);
+  };
+
+  msg.onerror = (e) => {
+    if (e.error === 'interrupted') return;
+    showToast(`⚠️ Speech Error: ${e.error}. अगली न्यूज़ पर जा रहे हैं।`);
+    newsIndex++;
+    setTimeout(playNews, 2000);
+  };
+
+  window.speechSynthesis.speak(msg);
+}
+
+// ════════════════════════════════════════════════════════
+//  CONTROLS
+// ════════════════════════════════════════════════════════
+function togglePanel() {
+  $('controlPanel').classList.toggle('open');
+}
+
+function skipNews() {
+  window.speechSynthesis.cancel();
+  clearInterval(imageInterval);
+  stopChroma();
+  video.pause();
+  hideLowerThird();
+  clearInterval(progressTimer);
+  newsIndex++;
+  setTimeout(() => { if (!isPaused) playNews(); }, 500);
+}
+
+let pausedAt = 0;
+function pauseResume() {
+  if (isPaused) {
+    isPaused = false;
+    // Restart from beginning of current (can't resume mid-speech in Web API)
+    newsIndex = Math.max(0, newsIndex - 1);
+    playNews();
+  } else {
+    isPaused = true;
+    window.speechSynthesis.cancel();
+    stopChroma();
+    video.pause();
+    bgMusic.pause();
+    hideLowerThird();
+    showToast('⏸ Broadcast Paused');
+  }
+}
+
+function restartCurrent() {
+  window.speechSynthesis.cancel();
+  stopChroma();
+  clearInterval(imageInterval);
+  hideLowerThird();
+  clearInterval(progressTimer);
+  newsIndex = Math.max(0, newsIndex - 1);
+  isPaused = false;
+  setTimeout(playNews, 300);
+}
+
+function stopAll() {
+  isPaused = true;
+  window.speechSynthesis.cancel();
+  stopChroma();
+  video.pause();
+  bgMusic.pause();
+  clearInterval(imageInterval);
+  clearInterval(progressTimer);
+  hideLowerThird();
+  progressFill.style.width = '0%';
+  teleprompter.textContent = '⏹ Broadcast Stopped';
+  showToast('⏹ Broadcast बंद हो गया।');
+}
+
+function updateRate(val) {
+  currentSpeechRate = parseFloat(val);
+  $('rateVal').textContent = `Rate: ${val}×`;
+}
+
+function updateVol(val) {
+  bgMusic.volume = parseFloat(val);
+}
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+async function initStudio() {
+  $('startBtn').disabled = true;
+  $('startBtn').textContent = 'लोड हो रहा है...';
+
+  try {
+    await loadVoices();
+    setLoadMsg('🎤 Voice Engine Ready...');
+
+    const count = await loadData();
+    setLoadMsg(`✅ ${count} न्यूज़ मिलीं! Studio शुरू हो रहा है...`);
+
+    // Fade out overlay
+    loadOverlay.style.opacity = '0';
+    setTimeout(() => { loadOverlay.style.display = 'none'; }, 1000);
+
+    // Check if anchor video exists
+    video.addEventListener('error', () => {
+      // Silently ignore — anchor video optional
+    });
+
+    setTimeout(playNews, 800);
+
+  } catch(err) {
+    setLoadMsg('');
+    showToast('❌ Error: ' + err.message, 7000);
+    $('startBtn').disabled = false;
+    $('startBtn').textContent = '▶ फिर से कोशिश करें';
+    console.error('[PTN Studio Error]', err);
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  KEYBOARD SHORTCUTS
+// ════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.code === 'ArrowRight') skipNews();
+  if (e.code === 'Space')      { e.preventDefault(); pauseResume(); }
+  if (e.code === 'KeyR')       restartCurrent();
+  if (e.code === 'KeyS')       stopAll();
+  if (e.code === 'KeyC')       togglePanel();
+});
+
+// ════════════════════════════════════════════════════════
+//  VISIBILITY: pause when tab is hidden
+// ════════════════════════════════════════════════════════
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    bgMusic.volume = 0.05;
+  } else {
+    bgMusic.volume = CONFIG.defaultVol;
+  }
+});
+</script>
+</body>
+</html>
