@@ -177,7 +177,7 @@
 
   /* ─── ANCHOR (Chroma Canvas) ─── */
   #anchorWrap {
-    position:absolute; right:0; bottom:85px;
+    position:absolute; right:0; bottom:95px;
     width:60%; height:75%;
     pointer-events:none; z-index:6;
     display:flex; justify-content:flex-end; align-items:flex-end;
@@ -192,8 +192,8 @@
 
   /* ─── LOWER THIRD ─── */
   #lowerThird {
-    position:absolute; left:2%; bottom:90px;
-    width:55%; z-index:7;
+    position:absolute; left:2%; bottom:96px;
+    width:65%; z-index:7;
     transform: translateY(20px);
     opacity:0;
     transition: all 0.5s ease;
@@ -203,16 +203,16 @@
 
   #ltHeadline {
     background: var(--red);
-    font-family:'Rajdhani'; font-size:15px; font-weight:700;
-    letter-spacing:3px; padding:5px 14px;
+    font-family:'Rajdhani'; font-size:20px; font-weight:700;
+    letter-spacing:3px; padding:6px 16px;
     text-transform:uppercase; display:inline-block;
   }
 
   #ltSubline {
     background: rgba(0,0,0,0.88);
     border-left:5px solid var(--gold);
-    font-family:'Noto Sans Devanagari'; font-size:19px; font-weight:700;
-    padding:8px 14px; display:block;
+    font-family:'Noto Sans Devanagari'; font-size:30px; font-weight:900;
+    padding:10px 16px; display:block;
     color:var(--gold);
     border-bottom: 1px solid #ffffff22;
   }
@@ -220,7 +220,7 @@
   /* ─── TICKER BAR ─── */
   #tickerBar {
     position:absolute; bottom:0; left:0; right:0;
-    height:78px; z-index:10;
+    height:88px; z-index:10;
     display:flex; align-items:stretch;
     background: linear-gradient(90deg, #900000, #580000);
     border-top:3px solid var(--red);
@@ -232,7 +232,7 @@
     width:120px; min-width:120px;
     display:flex; flex-direction:column;
     align-items:center; justify-content:center;
-    font-family:'Bebas Neue'; font-size:18px; letter-spacing:2px;
+    font-family:'Bebas Neue'; font-size:22px; letter-spacing:2px;
     border-right:3px solid #ffffff22;
     box-shadow: var(--glow-red);
   }
@@ -246,7 +246,7 @@
 
   #tickerInner {
     white-space:nowrap;
-    font-family:'Rajdhani'; font-size:30px; font-weight:700;
+    font-family:'Rajdhani'; font-size:38px; font-weight:700;
     padding: 0 40px;
     animation: tickerScroll 30s linear infinite;
     color:#fff;
@@ -374,7 +374,7 @@
 
   /* ─── PROGRESS BAR ─── */
   #progressBar {
-    position:absolute; bottom:78px; left:0; right:0; height:3px;
+    position:absolute; bottom:88px; left:0; right:0; height:3px;
     background:#ffffff15; z-index:11;
   }
   #progressFill {
